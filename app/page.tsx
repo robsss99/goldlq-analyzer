@@ -187,7 +187,7 @@ export default function Home() {
             </p>
           </div>
           <p className="text-xs text-gray-600">
-            Built with loveeeeee ❤️ by{" "}
+            Built with ❤️ by{" "}
             <span className="text-yellow-400">@360tradersss</span> · Powered by
             Claude AI
           </p>
