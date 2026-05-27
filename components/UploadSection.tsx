@@ -2,12 +2,13 @@
 
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 
-// Types untuk props
 interface UploadSectionProps {
   timeframe: "D1" | "H4" | "H1" | "M15";
   tradingStyle: "scalping" | "swing";
   onTimeframeChange: (tf: "D1" | "H4" | "H1" | "M15") => void;
   onTradingStyleChange: (style: "scalping" | "swing") => void;
+  onAnalyze: (file: File) => void;
+  isAnalyzing: boolean;
 }
 
 export default function UploadSection({
@@ -15,26 +16,23 @@ export default function UploadSection({
   tradingStyle,
   onTimeframeChange,
   onTradingStyleChange,
+  onAnalyze,
+  isAnalyzing,
 }: UploadSectionProps) {
-  // State untuk file management
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Ref untuk hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Validasi file
   const validateFile = (file: File): string | null => {
-    // Cek format
     const validTypes = ["image/png", "image/jpeg", "image/jpg"];
     if (!validTypes.includes(file.type)) {
       return "Format file harus PNG atau JPG";
     }
 
-    // Cek ukuran (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       return "Ukuran file maksimal 10MB";
     }
@@ -42,7 +40,6 @@ export default function UploadSection({
     return null;
   };
 
-  // Handle file selection
   const handleFile = (file: File) => {
     setError(null);
 
@@ -54,7 +51,6 @@ export default function UploadSection({
 
     setSelectedFile(file);
 
-    // Buat preview URL
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result as string);
@@ -62,17 +58,15 @@ export default function UploadSection({
     reader.readAsDataURL(file);
   };
 
-  // Handle file dari input
   const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
   };
 
-  // Handle drag events
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(true);
+    if (!isAnalyzing) setIsDragging(true);
   };
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
@@ -91,17 +85,20 @@ export default function UploadSection({
     e.stopPropagation();
     setIsDragging(false);
 
+    if (isAnalyzing) return;
+
     const file = e.dataTransfer.files?.[0];
     if (file) handleFile(file);
   };
 
-  // Trigger hidden file input
   const handleClick = () => {
-    fileInputRef.current?.click();
+    if (!isAnalyzing) {
+      fileInputRef.current?.click();
+    }
   };
 
-  // Reset file
   const handleReset = () => {
+    if (isAnalyzing) return;
     setSelectedFile(null);
     setPreviewUrl(null);
     setError(null);
@@ -110,7 +107,12 @@ export default function UploadSection({
     }
   };
 
-  // Format file size
+  const handleAnalyzeClick = () => {
+    if (selectedFile && !isAnalyzing) {
+      onAnalyze(selectedFile);
+    }
+  };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
@@ -121,7 +123,6 @@ export default function UploadSection({
     <div className="max-w-3xl mx-auto">
       {/* Settings Bar */}
       <div className="bg-[#131722] border border-[#1e222d] rounded-t-2xl p-6 space-y-6">
-        {/* Timeframe Selector */}
         <div>
           <label className="block text-sm font-medium text-gray-400 mb-3">
             📊 Timeframe Chart
@@ -131,11 +132,12 @@ export default function UploadSection({
               <button
                 key={tf}
                 onClick={() => onTimeframeChange(tf)}
+                disabled={isAnalyzing}
                 className={`py-3 px-4 rounded-lg font-semibold transition-all ${
                   timeframe === tf
                     ? "bg-yellow-400 text-black shadow-lg shadow-yellow-400/20"
                     : "bg-[#0a0e1a] text-gray-400 hover:text-yellow-400 border border-[#1e222d]"
-                }`}
+                } ${isAnalyzing ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {tf}
               </button>
@@ -143,7 +145,6 @@ export default function UploadSection({
           </div>
         </div>
 
-        {/* Trading Style */}
         <div>
           <label className="block text-sm font-medium text-gray-400 mb-3">
             🎯 Gaya Trading
@@ -151,21 +152,23 @@ export default function UploadSection({
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => onTradingStyleChange("scalping")}
+              disabled={isAnalyzing}
               className={`py-3 px-4 rounded-lg font-semibold transition-all ${
                 tradingStyle === "scalping"
                   ? "bg-yellow-400 text-black shadow-lg shadow-yellow-400/20"
                   : "bg-[#0a0e1a] text-gray-400 hover:text-yellow-400 border border-[#1e222d]"
-              }`}
+              } ${isAnalyzing ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               ⚡ Scalping
             </button>
             <button
               onClick={() => onTradingStyleChange("swing")}
+              disabled={isAnalyzing}
               className={`py-3 px-4 rounded-lg font-semibold transition-all ${
                 tradingStyle === "swing"
                   ? "bg-yellow-400 text-black shadow-lg shadow-yellow-400/20"
                   : "bg-[#0a0e1a] text-gray-400 hover:text-yellow-400 border border-[#1e222d]"
-              }`}
+              } ${isAnalyzing ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               📈 Swing
             </button>
@@ -175,7 +178,6 @@ export default function UploadSection({
 
       {/* Upload / Preview Area */}
       {!previewUrl ? (
-        // STATE: Belum ada file (Upload Area)
         <div
           onClick={handleClick}
           onDragEnter={handleDragEnter}
@@ -238,7 +240,6 @@ export default function UploadSection({
           </div>
         </div>
       ) : (
-        // STATE: Sudah ada file (Preview Area)
         <div className="bg-[#131722] border border-t-0 border-[#1e222d] rounded-b-2xl p-6">
           {/* Preview Image */}
           <div className="relative rounded-lg overflow-hidden border border-[#1e222d] mb-4">
@@ -249,26 +250,46 @@ export default function UploadSection({
               className="w-full max-h-96 object-contain bg-[#0a0e1a]"
             />
 
-            {/* Remove button overlay */}
-            <button
-              onClick={handleReset}
-              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/90 hover:bg-red-500 text-white flex items-center justify-center transition-all"
-              title="Hapus file"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {!isAnalyzing && (
+              <button
+                onClick={handleReset}
+                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/90 hover:bg-red-500 text-white flex items-center justify-center transition-all"
+                title="Hapus file"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+
+            {/* Loading Overlay */}
+            {isAnalyzing && (
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center">
+                <div className="text-center space-y-4">
+                  <div className="inline-block">
+                    <div className="w-16 h-16 border-4 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin"></div>
+                  </div>
+                  <div>
+                    <p className="text-yellow-400 font-semibold text-lg">
+                      🤖 AI sedang menganalisa...
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      Estimasi 10-20 detik
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* File Info */}
@@ -302,15 +323,25 @@ export default function UploadSection({
             </div>
           </div>
 
-          {/* Analyze Button */}
+          {/* Analyze Button - SEKARANG FUNCTIONAL! */}
           <button
-            disabled
+            onClick={handleAnalyzeClick}
+            disabled={isAnalyzing || !selectedFile}
             className="w-full py-4 rounded-xl font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:from-yellow-500 hover:to-yellow-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-yellow-400/20"
           >
-            🚀 Analisa dengan AI
-            <span className="block text-xs font-normal mt-1 opacity-70">
-              (Coming in Day 4 - Connect to Claude API)
-            </span>
+            {isAnalyzing ? (
+              <span className="flex items-center justify-center gap-3">
+                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
+                Sedang menganalisa...
+              </span>
+            ) : (
+              <>
+                🚀 Analisa dengan AI
+                <span className="block text-xs font-normal mt-1 opacity-70">
+                  Tekan untuk mulai analisa Claude Vision
+                </span>
+              </>
+            )}
           </button>
         </div>
       )}
@@ -333,18 +364,60 @@ export default function UploadSection({
       {/* Pro Tip */}
       <div className="mt-6 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
         <div className="flex items-start gap-3">
-          <span className="text-blue-400 text-lg">💡</span>
+          <span className="text-blue-400 text-lg flex-shrink-0">💡</span>
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-blue-400 mb-1">
+            <h4 className="text-sm font-semibold text-blue-400 mb-2">
               Pro Tip untuk Hasil Maksimal
             </h4>
-            <p className="text-xs text-gray-400 leading-relaxed">
+
+            {/* Tip 1: Header */}
+            <p className="text-xs text-gray-400 leading-relaxed mb-3">
               Pastikan <strong>header chart MT5 terlihat</strong> di screenshot
               (bagian yang menampilkan{" "}
-              <code className="text-yellow-400">XAUUSD Daily, O H L C</code>
-              ). Dengan header, AI bisa baca data OHLC secara{" "}
+              <code className="text-yellow-400">XAUUSD Daily, O H L C</code>).
+              Dengan header, AI bisa baca data OHLC secara{" "}
               <strong>akurat</strong>, bukan estimasi visual.
             </p>
+
+            {/* Tip 2: Closed Candle (NEW) */}
+            <div className="bg-[#0a0e1a]/50 border border-yellow-400/20 rounded-lg p-3 mb-3">
+              <p className="text-xs text-gray-300 leading-relaxed">
+                <strong className="text-yellow-400">⚠️ PENTING:</strong> Header
+                OHLC harus di satu{" "}
+                <strong className="text-yellow-400">
+                  candle terakhir yang sudah close
+                </strong>
+                , <strong>bukan candle sekarang</strong> yang masih berjalan.
+                Arahkan cursor ke candle yang sudah selesai untuk mendapatkan
+                data final.
+              </p>
+            </div>
+
+            {/* Tip 3: Best Setting Recommendation (NEW) */}
+            <div className="bg-[#26a69a]/5 border border-[#26a69a]/30 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <span className="text-[#26a69a] text-base flex-shrink-0">
+                  🎯
+                </span>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  <strong className="text-[#26a69a]">
+                    Untuk hasil dengan akurasi tinggi
+                  </strong>
+                  , disarankan menggunakan kombinasi:
+                  <span className="inline-flex items-center gap-1 mx-1">
+                    <code className="bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded text-xs font-semibold">
+                      Swing
+                    </code>
+                    <span className="text-gray-500">+</span>
+                    <code className="bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded text-xs font-semibold">
+                      Daily (D1)
+                    </code>
+                  </span>
+                  . Timeframe besar memberikan struktur yang lebih jelas dan
+                  pattern yang lebih terbaca oleh AI.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

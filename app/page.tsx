@@ -2,13 +2,54 @@
 
 import { useState } from "react";
 import UploadSection from "@/components/UploadSection";
+import AnalysisResult from "@/components/AnalysisResult";
 
 export default function Home() {
-  // State untuk timeframe & trading style
   const [timeframe, setTimeframe] = useState<"D1" | "H4" | "H1" | "M15">("D1");
   const [tradingStyle, setTradingStyle] = useState<"scalping" | "swing">(
     "swing",
   );
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+  const handleAnalyze = async (file: File) => {
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+    setAnalysisError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("timeframe", timeframe);
+      formData.append("tradingStyle", tradingStyle);
+
+      console.log("🤖 Sending analysis request...");
+      const startTime = Date.now();
+
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      if (data.success) {
+        console.log(`✅ Analysis completed in ${duration}s`);
+        console.log("Result:", data.analysis);
+        setAnalysisResult(data);
+      } else {
+        console.error("❌ API error:", data);
+        setAnalysisError(data.error || "Gagal menganalisa chart");
+      }
+    } catch (err) {
+      console.error("❌ Request failed:", err);
+      setAnalysisError("Gagal connect ke server. Cek koneksi internet Anda.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#0a0e1a]">
@@ -16,7 +57,7 @@ export default function Home() {
       <header className="border-b border-[#1e222d] bg-[#131722]/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
               <span className="text-black font-bold text-xl">G</span>
             </div>
             <div>
@@ -61,14 +102,38 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Upload Section (sekarang component terpisah!) */}
+      {/* Upload Section */}
       <section className="container mx-auto px-4 pb-12">
         <UploadSection
           timeframe={timeframe}
           tradingStyle={tradingStyle}
           onTimeframeChange={setTimeframe}
           onTradingStyleChange={setTradingStyle}
+          onAnalyze={handleAnalyze}
+          isAnalyzing={isAnalyzing}
         />
+
+        {/* Temporary Result Display (akan diganti dengan AnalysisResult component di Step 4) */}
+        {analysisError && (
+          <div className="max-w-3xl mx-auto mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+            <div className="flex items-start gap-3">
+              <span className="text-red-400 text-lg">❌</span>
+              <div>
+                <h4 className="text-sm font-semibold text-red-400 mb-1">
+                  Analisa Gagal
+                </h4>
+                <p className="text-xs text-gray-400">{analysisError}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {analysisResult && (
+          <AnalysisResult
+            analysis={analysisResult.analysis}
+            metadata={analysisResult.metadata}
+          />
+        )}
       </section>
 
       {/* Footer */}
