@@ -83,7 +83,8 @@ export default function Home() {
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
         <div className="inline-block px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 mb-6">
           <span className="text-sm text-yellow-400 font-medium">
-            ✨ Powered by Claude Vision AI
+            ✨ Welcome to GoldLQ Analyzer - Your Ultimate Gold Chart Analysis
+            Tool! ✨
           </span>
         </div>
 
@@ -150,8 +151,7 @@ export default function Home() {
           </div>
           <p className="text-xs text-gray-600">
             Built with 💕 by{" "}
-            <span className="text-yellow-400">@360tradersss</span> · Powered by
-            Claude AI
+            <span className="text-yellow-400">@360tradersss</span>
           </p>
         </div>
       </footer>
