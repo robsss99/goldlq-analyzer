@@ -83,8 +83,7 @@ export default function Home() {
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">
         <div className="inline-block px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 mb-6">
           <span className="text-sm text-yellow-400 font-medium">
-            ✨ Welcome to GoldLQ Analyzer - Your Ultimate Gold Chart Analysis
-            Tool! ✨
+            ✨ Your Ultimate Gold Chart Analysis Tool! ✨
           </span>
         </div>
 

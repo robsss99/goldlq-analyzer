@@ -338,7 +338,8 @@ export default function UploadSection({
               <>
                 🚀 Analisa dengan AI
                 <span className="block text-xs font-normal mt-1 opacity-70">
-                  Tekan untuk mulai analisa Claude Vision
+                  Tekan untuk mulai analisa menggunakan Teknikal andalan
+                  360tradersss!
                 </span>
               </>
             )}
