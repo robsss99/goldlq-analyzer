@@ -74,20 +74,20 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Video Section (Placeholder) */}
-          <div className="aspect-video bg-[#0a0e1a] rounded-xl border border-[#1e222d] flex items-center justify-center relative overflow-hidden">
-            <div className="text-center space-y-3 px-4">
-              <div className="text-6xl">🎬</div>
-              <div>
-                <p className="text-yellow-400 font-semibold text-lg">
-                  Video Tutorial Coming Soon
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Video 30 detik akan segera tersedia
-                </p>
-              </div>
+          {/* Video Tutorial (YouTube Shorts - Portrait) */}
+          <div className="flex justify-center">
+            <div
+              className="relative w-full max-w-[280px] rounded-xl overflow-hidden border border-yellow-400/20 bg-[#0a0e1a]"
+              style={{ aspectRatio: "9 / 16" }}
+            >
+              <iframe
+                src="https://www.youtube.com/embed/jTeFEymeuz4"
+                title="Tutorial GoldLQ Analyzer"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
             </div>
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-linear-to-br from-yellow-400/5 to-transparent pointer-events-none"></div>
           </div>
 
           {/* Step by Step Guide */}
