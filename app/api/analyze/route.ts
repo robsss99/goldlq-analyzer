@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { buildAnalysisPrompt } from "@/lib/prompts";
+import { cookies } from "next/headers";
+import { supabaseAdmin } from "@/lib/supabase";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -8,6 +10,59 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
+    // ===== GERBANG PROTEKSI (Fase D) =====
+    // 1. Baca cookie sesi → siapa user-nya?
+    const cookieStore = await cookies();
+    const username = cookieStore.get("goldlq_session")?.value;
+
+    if (!username) {
+      return NextResponse.json(
+        { error: "Kamu belum login. Silakan login dulu." },
+        { status: 401 },
+      );
+    }
+
+    // 2. Cari user di Supabase
+    const { data: user, error: userError } = await supabaseAdmin
+      .from("users")
+      .select("*")
+      .eq("username", username)
+      .single();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Sesi tidak valid. Silakan login ulang." },
+        { status: 401 },
+      );
+    }
+
+    // 3. Cek akun aktif
+    if (!user.is_active) {
+      return NextResponse.json(
+        { error: "Akun kamu nonaktif. Hubungi admin." },
+        { status: 403 },
+      );
+    }
+
+    // 4. Cek masa aktif (expired?)
+    if (new Date(user.expires_at) < new Date()) {
+      return NextResponse.json(
+        { error: "Masa aktif kamu sudah habis. Silakan perpanjang." },
+        { status: 403 },
+      );
+    }
+
+    // 5. Cek kuota upload
+    if (user.upload_count >= user.upload_limit) {
+      return NextResponse.json(
+        {
+          error: "Kuota upload kamu sudah habis (" + user.upload_limit + "x).",
+        },
+        { status: 403 },
+      );
+    }
+    // ===== LOLOS — lanjut ke analisa =====
+
     const formData = await request.formData();
     const file = formData.get("image") as File | null;
     const timeframe = (formData.get("timeframe") as string) || "D1";
@@ -103,6 +158,23 @@ export async function POST(request: NextRequest) {
     }
 
     const processingTimeStr = duration + "s";
+
+    // ===== Sukses → tambah hitungan upload =====
+    const { error: updateError } = await supabaseAdmin
+      .from("users")
+      .update({ upload_count: user.upload_count + 1 })
+      .eq("username", username);
+
+    if (updateError) {
+      console.error("GAGAL update upload_count:", updateError);
+    } else {
+      console.log(
+        "upload_count naik:",
+        user.upload_count,
+        "->",
+        user.upload_count + 1,
+      );
+    }
 
     return NextResponse.json({
       success: true,
