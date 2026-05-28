@@ -25,6 +25,7 @@ export default function UploadSection({
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [wasCompressed, setWasCompressed] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,16 +35,65 @@ export default function UploadSection({
       return "Format file harus PNG atau JPG";
     }
 
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      return "Ukuran file maksimal 10MB";
+      return "Ukuran file maksimal 5MB";
     }
 
     return null;
   };
 
-  const handleFile = (file: File) => {
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+
+      img.onload = () => {
+        const maxWidth = 1568;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+        }
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          "image/jpeg",
+          0.85,
+        );
+      };
+
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFile = async (file: File) => {
     setError(null);
+    setWasCompressed(false);
 
     const validationError = validateFile(file);
     if (validationError) {
@@ -51,13 +101,21 @@ export default function UploadSection({
       return;
     }
 
-    setSelectedFile(file);
+    let finalFile = file;
+
+    const compressThreshold = 3 * 1024 * 1024;
+    if (file.size > compressThreshold) {
+      finalFile = await compressImage(file);
+      setWasCompressed(true);
+    }
+
+    setSelectedFile(finalFile);
 
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result as string);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(finalFile);
   };
 
   const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +295,7 @@ export default function UploadSection({
                   </span>
                 </p>
                 <p className="text-gray-500 text-xs mt-3">
-                  Format: PNG, JPG (max 10MB)
+                  Format: PNG, JPG (max 5MB)
                 </p>
               </div>
             </div>
@@ -325,6 +383,32 @@ export default function UploadSection({
                 </div>
               </div>
             </div>
+
+            {/* Warning Kompres */}
+            {wasCompressed && (
+              <div className="mb-4 px-4 py-3 rounded-lg bg-yellow-500/10 border border-yellow-500/40">
+                <div className="flex items-start gap-2">
+                  <span className="text-base shrink-0">⚠️</span>
+                  <div className="text-xs text-yellow-200 leading-relaxed">
+                    <span className="font-bold text-yellow-400">
+                      File terlalu besar — dikompres otomatis.{" "}
+                    </span>
+                    Gambar dikompres agar bisa diproses. Hasil analisa{" "}
+                    <span className="font-semibold">mungkin kurang akurat</span>
+                    .{" "}
+                    <span className="block mt-1">
+                      💡 Gunakan{" "}
+                      <span className="font-semibold">screenshot langsung</span>{" "}
+                      (bukan foto kamera) dengan{" "}
+                      <span className="font-semibold">
+                        header OHLC terlihat jelas
+                      </span>
+                      .
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Analyze Button - SEKARANG FUNCTIONAL! */}
             <button
