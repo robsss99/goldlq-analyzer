@@ -3,6 +3,7 @@
 import { useState } from "react";
 import UploadSection from "@/components/UploadSection";
 import AnalysisResult from "@/components/AnalysisResult";
+import StatusBanner from "@/components/StatusBanner";
 
 export default function Home() {
   const [timeframe, setTimeframe] = useState<"D1" | "H4" | "H1" | "M15">("D1");
@@ -12,6 +13,10 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [statusOverride, setStatusOverride] = useState<{
+    used: number;
+    remaining: number;
+  } | null>(null);
 
   const handleAnalyze = async (file: File) => {
     setIsAnalyzing(true);
@@ -39,6 +44,15 @@ export default function Home() {
         console.log(`✅ Analysis completed in ${duration}s`);
         console.log("Result:", data.analysis);
         setAnalysisResult(data);
+
+        // Update info banner real-time (trial ATAU user login)
+        const newInfo = data.trial || data.user;
+        if (newInfo) {
+          setStatusOverride({
+            used: newInfo.used,
+            remaining: newInfo.remaining,
+          });
+        }
       } else {
         console.error("❌ API error:", data);
         setAnalysisError(data.error || "Gagal menganalisa chart");
@@ -78,6 +92,12 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Status Banner */}
+      <StatusBanner
+        overrideUsed={statusOverride?.used}
+        overrideRemaining={statusOverride?.remaining}
+      />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-12 md:py-20 text-center">

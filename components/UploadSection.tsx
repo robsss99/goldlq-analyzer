@@ -356,7 +356,7 @@ export default function UploadSection({
             {/* File Info */}
             <div className="flex items-center justify-between mb-4 px-3 py-2 bg-[#0a0e1a] rounded-lg border border-[#1e222d]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
                   <svg
                     className="w-5 h-5 text-green-500"
                     fill="none"
@@ -414,7 +414,7 @@ export default function UploadSection({
             <button
               onClick={handleAnalyzeClick}
               disabled={isAnalyzing || !selectedFile}
-              className="w-full py-4 rounded-xl font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:from-yellow-500 hover:to-yellow-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-yellow-400/20"
+              className="w-full py-4 rounded-xl font-semibold bg-linear-to-r from-yellow-400 to-yellow-500 text-black hover:from-yellow-500 hover:to-yellow-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-yellow-400/20"
             >
               {isAnalyzing ? (
                 <span className="flex items-center justify-center gap-3">
@@ -452,7 +452,7 @@ export default function UploadSection({
         {/* Pro Tip */}
         <div className="mt-6 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
           <div className="flex items-start gap-3">
-            <span className="text-blue-400 text-lg flex-shrink-0">💡</span>
+            <span className="text-blue-400 text-lg shrink-0">💡</span>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-blue-400 mb-2">
                 Pro Tip untuk Hasil Maksimal
@@ -484,7 +484,7 @@ export default function UploadSection({
               {/* Tip 3: Best Setting Recommendation (NEW) */}
               <div className="bg-[#26a69a]/5 border border-[#26a69a]/30 rounded-lg p-3">
                 <div className="flex items-start gap-2">
-                  <span className="text-[#26a69a] text-base flex-shrink-0">
+                  <span className="text-[#26a69a] text-base shrink-0">
                     🎯
                   </span>
                   <p className="text-xs text-gray-300 leading-relaxed">
