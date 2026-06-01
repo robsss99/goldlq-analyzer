@@ -229,11 +229,11 @@ export default function StatusBanner({
             <span className="text-2xl">🎁</span>
             <div>
               <p className="text-sm font-semibold text-blue-300">
-                Mode Trial:{" "}
+                Coba dulu{" "}
                 <span className="text-white">
                   {remaining}/{me.limit}
                 </span>{" "}
-                upload tersisa
+                upload tersisa. Kalau cocok baru deh lanjut berlangganan!
               </p>
               <p className="text-xs text-gray-400">
                 Login kalau sudah punya akun berlangganan.
