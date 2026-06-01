@@ -47,6 +47,11 @@ export default function Home() {
 
         // Update info banner real-time (trial ATAU user login)
         const newInfo = data.trial || data.user;
+        console.log("🔍 DEBUG:", {
+          trial: data.trial,
+          user: data.user,
+          newInfo: newInfo,
+        });
         if (newInfo) {
           setStatusOverride({
             used: newInfo.used,

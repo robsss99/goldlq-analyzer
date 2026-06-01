@@ -57,12 +57,13 @@ export async function GET() {
       }
     }
 
-    // ===== Pengunjung baru (belum ada cookie apapun) =====
+    // ===== Pengunjung baru (belum ada cookie apapun) — perlakukan sebagai trial dengan jatah penuh =====
     return NextResponse.json({
-      status: "new",
+      status: "trial",
       used: 0,
       limit: 5,
       remaining: 5,
+      isTrialDone: false,
       canAnalyze: true,
     });
   } catch (error) {

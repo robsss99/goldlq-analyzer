@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 // Tipe data dari /api/me
 type MeStatus = {
-  status: "user" | "trial" | "new";
+  status: "user" | "trial";
   username?: string;
   used: number;
   limit: number;
@@ -150,7 +150,7 @@ export default function StatusBanner({
                 Halo, {me.username}!
               </p>
               <p className="text-xs text-gray-400">
-                67:{" "}
+                Sisa Kuota :{" "}
                 <span className="text-white font-semibold">
                   {remaining}/{me.limit}
                 </span>{" "}
@@ -251,28 +251,6 @@ export default function StatusBanner({
     );
   }
 
-  // 6. PENGUNJUNG BARU
-  return (
-    <div className="container mx-auto px-4 pt-4">
-      <div className="max-w-3xl mx-auto p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🎁</span>
-          <div>
-            <p className="text-sm font-semibold text-blue-300">
-              Mode Trial: 5x upload gratis tanpa login
-            </p>
-            <p className="text-xs text-gray-400">
-              Coba dulu, kalau cocok baru berlangganan.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => router.push("/login")}
-          className="px-4 py-2 rounded-lg bg-yellow-400/20 hover:bg-yellow-400/30 border border-yellow-400/40 text-yellow-400 font-semibold text-xs transition"
-        >
-          🔑 Login
-        </button>
-      </div>
-    </div>
-  );
+  // 6. Fallback (seharusnya nggak bakal kejadian cuma buat keamanan)
+  return null;
 }
