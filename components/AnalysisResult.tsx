@@ -50,6 +50,16 @@ interface AnalysisData {
   warnings: string[];
   notes: string;
   recommendation: string;
+  scenarios?: {
+    ifTpHit: {
+      title: string;
+      steps: string[];
+    };
+    ifSlHit: {
+      title: string;
+      steps: string[];
+    };
+  };
 }
 
 interface AnalysisResultProps {
@@ -134,7 +144,7 @@ export default function AnalysisResult({
       {analysis.ohlc.readSource === "visual_estimate" && (
         <div className="bg-[#ef5350]/10 border-2 border-[#ef5350] rounded-2xl p-6 animate-pulse-slow">
           <div className="flex items-start gap-4">
-            <div className="text-4xl flex-shrink-0">🚨</div>
+            <div className="text-4xl shrink-0">🚨</div>
             <div className="flex-1">
               <h3 className="text-xl md:text-2xl font-bold text-[#ef5350] mb-2">
                 PERHATIAN! Header Chart Tidak Terdeteksi
@@ -544,6 +554,47 @@ export default function AnalysisResult({
           <p className="text-sm text-gray-300 leading-relaxed">
             {analysis.recommendation}
           </p>
+        </div>
+      )}
+
+      {/* Skenario Lanjutan (Playbook) */}
+      {analysis.scenarios && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Jika TP */}
+          <div className="bg-[#26a69a]/5 border border-[#26a69a]/30 rounded-2xl p-6">
+            <h3 className="text-base font-semibold flex items-center gap-2 mb-3 text-[#26a69a]">
+              <span>✅</span> {analysis.scenarios.ifTpHit.title}
+            </h3>
+            <ul className="space-y-2.5">
+              {analysis.scenarios.ifTpHit.steps.map((step, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-start gap-2 text-sm text-gray-300 leading-relaxed"
+                >
+                  <span className="text-[#26a69a] mt-0.5 shrink-0">→</span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Jika SL */}
+          <div className="bg-[#ef5350]/5 border border-[#ef5350]/30 rounded-2xl p-6">
+            <h3 className="text-base font-semibold flex items-center gap-2 mb-3 text-[#ef5350]">
+              <span>🛑</span> {analysis.scenarios.ifSlHit.title}
+            </h3>
+            <ul className="space-y-2.5">
+              {analysis.scenarios.ifSlHit.steps.map((step, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-start gap-2 text-sm text-gray-300 leading-relaxed"
+                >
+                  <span className="text-[#ef5350] mt-0.5 shrink-0">→</span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>

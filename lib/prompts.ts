@@ -63,6 +63,23 @@ ATURAN KETAT untuk "readSource":
    - Risk management tips
    - Konfirmasi yang dibutuhkan sebelum entry
 
+6. SKENARIO LANJUTAN (PLAYBOOK)
+   Buat 2 skenario actionable berdasarkan setup di atas:
+
+   a. Skenario JIKA TP TERCAPAI (setup berhasil):
+      - Apa yang harus dilakukan kalau harga gerak sesuai prediksi
+      - Kondisi untuk follow-through ke target lebih jauh (level + syarat)
+      - Peluang re-entry (kapan & di level mana)
+      - Tips manajemen posisi (trailing stop, partial close)
+
+   b. Skenario JIKA SL TERKENA (setup gagal):
+      - Level/kondisi yang membatalkan bias (misal: close di atas/bawah level X di timeframe tertentu)
+      - Arah baru yang terbuka kalau setup batal (level target reversal)
+      - Apa yang harus ditunggu sebelum entry lawan arah (konfirmasi)
+
+   Tiap skenario buat 3-4 poin actionable, spesifik dengan angka/level dari analisa di atas.
+   Gunakan bahasa praktis seperti seorang mentor trading ke muridnya.
+
 FORMAT OUTPUT (JSON):
 Berikan response HANYA dalam format JSON valid berikut (tanpa markdown code block, tanpa komentar tambahan):
 
@@ -112,7 +129,18 @@ Berikan response HANYA dalam format JSON valid berikut (tanpa markdown code bloc
   },
   "warnings": [string],
   "notes": string,
-  "recommendation": string
+  "recommendation": string,
+  "scenarios": {
+    "ifTpHit": {
+      "title": string,
+      "steps": [string]
+    },
+    "ifSlHit": {
+      "title": string,
+      "steps": [string]
+    }
+  }
+}
 }
 
 PENTING:
@@ -120,5 +148,7 @@ PENTING:
 - Semua angka numeric (tanpa kutip)
 - Semua string dalam Bahasa Indonesia
 - "warnings" array bisa kosong [] jika tidak ada warning
-- "notes" dan "recommendation" wajib diisi dengan analisa singkat`;
+- "notes" dan "recommendation" wajib diisi dengan analisa singkat
+- "scenarios.ifTpHit.steps" dan "scenarios.ifSlHit.steps" masing-masing 3-4 poin actionable dengan level/angka spesifik
+- "scenarios.ifTpHit.title" dan "scenarios.ifSlHit.title" judul singkat (misal "Jika TP1 Tercapai" / "Jika SL Terkena")`;
 };
