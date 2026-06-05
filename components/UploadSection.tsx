@@ -10,6 +10,7 @@ interface UploadSectionProps {
   onTradingStyleChange: (style: "scalping" | "swing") => void;
   onAnalyze: (file: File) => void;
   isAnalyzing: boolean;
+  hideProTip?: boolean;
 }
 
 export default function UploadSection({
@@ -19,6 +20,7 @@ export default function UploadSection({
   onTradingStyleChange,
   onAnalyze,
   isAnalyzing,
+  hideProTip,
 }: UploadSectionProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -449,74 +451,76 @@ export default function UploadSection({
           </div>
         )}
 
-        {/* Pro Tip */}
-        <div className="mt-6 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
-          <div className="flex items-start gap-3">
-            <span className="text-blue-400 text-lg shrink-0">💡</span>
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold text-blue-400 mb-2">
-                Pro Tip untuk Hasil Maksimal
-              </h4>
+        {/* Pro Tip - disembunyikan kalau analisa sukses dan header kebaca */}
+        {!hideProTip && (
+          <div className="mt-6 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+            <div className="flex items-start gap-3">
+              <span className="text-blue-400 text-lg shrink-0">💡</span>
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold text-blue-400 mb-2">
+                  Pro Tip untuk Hasil Maksimal
+                </h4>
 
-              {/* Tip 1: Header */}
-              <p className="text-xs text-gray-400 leading-relaxed mb-3">
-                Pastikan <strong>header chart MT5 terlihat</strong> di
-                screenshot (bagian yang menampilkan{" "}
-                <code className="text-yellow-400">XAUUSD Daily, O H L C</code>).
-                Dengan header, AI bisa baca data OHLC secara{" "}
-                <strong>akurat</strong>, bukan estimasi visual.
-              </p>
-
-              {/* Tip 2: Closed Candle (NEW) */}
-              <div className="bg-[#0a0e1a]/50 border border-yellow-400/20 rounded-lg p-3 mb-3">
-                <p className="text-xs text-gray-300 leading-relaxed">
-                  <strong className="text-yellow-400">⚠️ PENTING:</strong>{" "}
-                  Header OHLC harus di satu{" "}
-                  <strong className="text-yellow-400">
-                    candle terakhir yang sudah close
-                  </strong>
-                  , <strong>bukan candle sekarang</strong> yang masih berjalan.
-                  Arahkan cursor ke candle yang sudah selesai untuk mendapatkan
-                  data final.
+                {/* Tip 1: Header */}
+                <p className="text-xs text-gray-400 leading-relaxed mb-3">
+                  Pastikan <strong>header chart MT5 terlihat</strong> di
+                  screenshot (bagian yang menampilkan{" "}
+                  <code className="text-yellow-400">XAUUSD Daily, O H L C</code>
+                  ). Dengan header, AI bisa baca data OHLC secara{" "}
+                  <strong>akurat</strong>, bukan estimasi visual.
                 </p>
-              </div>
 
-              {/* Tip 3: Best Setting Recommendation (NEW) */}
-              <div className="bg-[#26a69a]/5 border border-[#26a69a]/30 rounded-lg p-3">
-                <div className="flex items-start gap-2">
-                  <span className="text-[#26a69a] text-base shrink-0">
-                    🎯
-                  </span>
+                {/* Tip 2: Closed Candle (NEW) */}
+                <div className="bg-[#0a0e1a]/50 border border-yellow-400/20 rounded-lg p-3 mb-3">
                   <p className="text-xs text-gray-300 leading-relaxed">
-                    <strong className="text-[#26a69a]">
-                      Untuk hasil dengan akurasi tinggi
+                    <strong className="text-yellow-400">⚠️ PENTING:</strong>{" "}
+                    Header OHLC harus di satu{" "}
+                    <strong className="text-yellow-400">
+                      candle terakhir yang sudah close
                     </strong>
-                    , disarankan menggunakan kombinasi:
-                    <span className="inline-flex items-center gap-1 mx-1">
-                      <code className="bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded text-xs font-semibold">
-                        Swing
-                      </code>
-                      <span className="text-gray-500">+</span>
-                      <code className="bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded text-xs font-semibold">
-                        Daily (D1)
-                      </code>
-                    </span>
-                    . Timeframe besar memberikan struktur yang lebih jelas dan
-                    pattern yang lebih terbaca oleh AI.
+                    , <strong>bukan candle sekarang</strong> yang masih
+                    berjalan. Arahkan cursor ke candle yang sudah selesai untuk
+                    mendapatkan data final.
                   </p>
                 </div>
+
+                {/* Tip 3: Best Setting Recommendation (NEW) */}
+                <div className="bg-[#26a69a]/5 border border-[#26a69a]/30 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <span className="text-[#26a69a] text-base shrink-0">
+                      🎯
+                    </span>
+                    <p className="text-xs text-gray-300 leading-relaxed">
+                      <strong className="text-[#26a69a]">
+                        Untuk hasil dengan akurasi tinggi
+                      </strong>
+                      , disarankan menggunakan kombinasi:
+                      <span className="inline-flex items-center gap-1 mx-1">
+                        <code className="bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded text-xs font-semibold">
+                          Swing
+                        </code>
+                        <span className="text-gray-500">+</span>
+                        <code className="bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded text-xs font-semibold">
+                          Daily (D1)
+                        </code>
+                      </span>
+                      . Timeframe besar memberikan struktur yang lebih jelas dan
+                      pattern yang lebih terbaca oleh AI.
+                    </p>
+                  </div>
+                </div>
+                {/* Tombol Tutorial Video */}
+                <button
+                  onClick={() => setShowTutorial(true)}
+                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-sm transition-all"
+                >
+                  <span className="text-base">🎬</span>
+                  <span>Lihat Video Tutorial Penggunaan</span>
+                </button>
               </div>
-              {/* Tombol Tutorial Video */}
-              <button
-                onClick={() => setShowTutorial(true)}
-                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-sm transition-all"
-              >
-                <span className="text-base">🎬</span>
-                <span>Lihat Video Tutorial Penggunaan</span>
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
       {/* Tutorial Modal */}
       <TutorialModal

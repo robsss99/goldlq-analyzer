@@ -136,6 +136,10 @@ export default function Home() {
           onTradingStyleChange={setTradingStyle}
           onAnalyze={handleAnalyze}
           isAnalyzing={isAnalyzing}
+          hideProTip={
+            analysisResult !== null &&
+            analysisResult.analysis?.ohlc?.readSource === "header"
+          }
         />
 
         {/* Temporary Result Display (akan diganti dengan AnalysisResult component di Step 4) */}
