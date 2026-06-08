@@ -200,13 +200,12 @@ export default function StatusBanner({
             >
               🔑 Login
             </button>
-            <div className="text-xs text-gray-400">
-              Belum punya akun? Berlangganan{" "}
-              <span className="text-yellow-400 font-semibold">
-                Rp 150.000/bulan
-              </span>{" "}
-              (150x upload). Hubungi admin @360tradersss.
-            </div>
+            <a
+              href="/fullversion"
+              className="px-4 py-2 rounded-lg bg-[#26a69a]/10 hover:bg-[#26a69a]/20 border border-[#26a69a]/30 text-[#26a69a] font-semibold text-sm transition"
+            >
+              📋 Lihat cara berlangganan →
+            </a>
           </div>
         </div>
       </div>
