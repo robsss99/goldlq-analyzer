@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import UploadSection from "@/components/UploadSection";
 import AnalysisResult from "@/components/AnalysisResult";
 import StatusBanner from "@/components/StatusBanner";
@@ -56,15 +56,27 @@ export default function Home() {
   } | null>(null);
 
   const [showWelcome, setShowWelcome] = useState(false);
+  const utmRef = useRef<string | null>(null);
   const [quoteIndex, setQuoteIndex] = useState(0);
 
   useEffect(() => {
-    // Random quote - harus di client bukan SSR
+    // Random quote
     setQuoteIndex(Math.floor(Math.random() * TRADING_QUOTES.length));
+
+    // Welcome modal
     if (window.location.search.includes("welcome=1")) {
-      // Bersihkan URL param tanpa reload
       window.history.replaceState({}, "", "/");
       setShowWelcome(true);
+    }
+
+    // ===== UTM Tracking =====
+    // ===== UTM Tracking =====
+    const params = new URLSearchParams(window.location.search);
+    const utmSrc = params.get("utm_source");
+    if (utmSrc) {
+      const medium = params.get("utm_medium") || "";
+      const campaign = params.get("utm_campaign") || "";
+      utmRef.current = [utmSrc, medium, campaign].filter(Boolean).join("_");
     }
   }, []);
 
@@ -88,6 +100,10 @@ export default function Home() {
       formData.append("image", file);
       formData.append("timeframe", timeframe);
       formData.append("tradingStyle", tradingStyle);
+      // Kirim UTM kalau ada
+      if (utmRef.current) {
+        formData.append("utm_source", utmRef.current);
+      }
 
       console.log("🤖 Sending analysis request...");
       const startTime = Date.now();

@@ -24,6 +24,13 @@ type Stats = {
   };
 };
 
+type Activity = {
+  dates: string[];
+  trials: number[];
+  users: number[];
+  sources: [string, number][];
+};
+
 // Helper: generate access code random
 function generateCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -44,6 +51,11 @@ function formatDate(iso: string) {
   });
 }
 
+function getDayLabel(dateStr: string): string {
+  const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+  return days[new Date(dateStr + "T12:00:00").getDay()];
+}
+
 // Helper: cek expired
 function isExpired(iso: string) {
   return new Date(iso) < new Date();
@@ -58,6 +70,7 @@ export default function AdminPage() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [activity, setActivity] = useState<Activity | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Form tambah user
@@ -91,14 +104,17 @@ export default function AdminPage() {
   async function loadData() {
     setIsLoadingData(true);
     try {
-      const [usersRes, statsRes] = await Promise.all([
+      const [usersRes, statsRes, activityRes] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/admin/stats"),
+        fetch("/api/admin/activity"),
       ]);
       const usersData = await usersRes.json();
       const statsData = await statsRes.json();
+      const activityData = await activityRes.json();
       setUsers(usersData.users || []);
       setStats(statsData);
+      setActivity(activityData);
     } catch {
       console.error("Gagal load data");
     }
@@ -278,6 +294,67 @@ export default function AdminPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6 max-w-5xl">
+        {/* ===== F7-A: USER SEGERA EXPIRED ===== */}
+        {(() => {
+          const expiringSoon = users.filter((u) => {
+            const days = Math.ceil(
+              (new Date(u.expires_at).getTime() - new Date().getTime()) /
+                (1000 * 60 * 60 * 24),
+            );
+            return days >= 0 && days <= 7 && u.is_active;
+          });
+          if (expiringSoon.length === 0) return null;
+          return (
+            <div>
+              <h2 className="text-sm font-semibold text-orange-400 mb-3">
+                ⚠️ Segera Expired ({expiringSoon.length} user)
+              </h2>
+              <div className="space-y-2">
+                {expiringSoon.map((user) => {
+                  const daysLeft = Math.ceil(
+                    (new Date(user.expires_at).getTime() -
+                      new Date().getTime()) /
+                      (1000 * 60 * 60 * 24),
+                  );
+                  return (
+                    <div
+                      key={user.id}
+                      className="bg-orange-500/5 border border-orange-500/30 rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">⏰</span>
+                        <div>
+                          <span className="font-mono font-semibold text-orange-300 text-sm">
+                            {user.username}
+                          </span>
+                          <p className="text-xs text-gray-500">
+                            Expired dalam{" "}
+                            <span className="text-orange-400 font-semibold">
+                              {daysLeft} hari
+                            </span>{" "}
+                            · {user.upload_count}/{user.upload_limit} upload
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() =>
+                          handleUserAction(user.username, "extend")
+                        }
+                        disabled={!!actionLoading}
+                        className="px-3 py-1.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-300 text-xs font-semibold transition disabled:opacity-50"
+                      >
+                        {actionLoading === user.username + "_extend"
+                          ? "..."
+                          : "+1 Bulan"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ===== STATISTIK ===== */}
         {stats && (
           <div>
@@ -320,6 +397,127 @@ export default function AdminPage() {
                   <p className="text-xs text-gray-600 mt-1">{s.sub}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ===== F7-B: SUMBER TRAFFIC ===== */}
+        {activity && activity.sources.length > 0 && (
+          <div>
+            <h2 className="text-sm font-semibold text-gray-400 mb-3">
+              🌐 Sumber Trial
+            </h2>
+            <div className="bg-[#131722] border border-[#1e222d] rounded-2xl p-5">
+              <div className="space-y-2.5">
+                {activity.sources.map(([src, count]) => {
+                  const total = activity.sources.reduce((s, [, c]) => s + c, 0);
+                  const pct = Math.round((count / total) * 100);
+                  const srcIcon =
+                    src === "tiktok"
+                      ? "🎵"
+                      : src === "instagram"
+                        ? "📸"
+                        : src === "whatsapp"
+                          ? "💬"
+                          : src === "telegram"
+                            ? "✈️"
+                            : "🌿";
+                  return (
+                    <div key={src} className="flex items-center gap-3">
+                      <span className="text-base w-5">{srcIcon}</span>
+                      <span className="text-xs text-gray-400 w-20 capitalize">
+                        {src}
+                      </span>
+                      <div className="flex-1 bg-[#0a0e1a] rounded-full h-2">
+                        <div
+                          className="h-2 bg-blue-500/60 rounded-full"
+                          style={{ width: pct + "%" }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-400 w-12 text-right">
+                        {count}x ({pct}%)
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== F7-C: AKTIVITAS 7 HARI ===== */}
+        {activity && (
+          <div>
+            <h2 className="text-sm font-semibold text-gray-400 mb-3">
+              📈 Aktivitas 7 Hari Terakhir
+            </h2>
+            <div className="bg-[#131722] border border-[#1e222d] rounded-2xl p-5">
+              {/* Legend */}
+              <div className="flex gap-4 mb-4">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm bg-blue-500/60" />
+                  <span className="text-xs text-gray-500">Trial baru</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm bg-yellow-400/60" />
+                  <span className="text-xs text-gray-500">User baru</span>
+                </div>
+              </div>
+
+              {/* Chart */}
+              <div className="flex items-end justify-between gap-1.5 h-24">
+                {activity.dates.map((date, i) => {
+                  const maxVal = Math.max(
+                    ...activity.trials,
+                    ...activity.users,
+                    1,
+                  );
+                  const trialH = Math.round((activity.trials[i] / maxVal) * 96);
+                  const userH = Math.round((activity.users[i] / maxVal) * 96);
+                  return (
+                    <div
+                      key={date}
+                      className="flex-1 flex flex-col items-center gap-1"
+                    >
+                      <div className="w-full flex items-end justify-center gap-0.5 h-20">
+                        {/* Trial bar */}
+                        <div
+                          className="flex-1 bg-blue-500/50 hover:bg-blue-500/70 rounded-t transition-all"
+                          style={{ height: trialH + "px" }}
+                          title={"Trial: " + activity.trials[i]}
+                        />
+                        {/* User bar */}
+                        <div
+                          className="flex-1 bg-yellow-400/50 hover:bg-yellow-400/70 rounded-t transition-all"
+                          style={{ height: userH + "px" }}
+                          title={"User: " + activity.users[i]}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-600">
+                        {getDayLabel(date)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Numbers */}
+              <div className="grid grid-cols-7 gap-1 mt-2">
+                {activity.dates.map((date, i) => (
+                  <div key={date} className="text-center">
+                    {activity.trials[i] > 0 && (
+                      <p className="text-xs text-blue-400">
+                        {activity.trials[i]}
+                      </p>
+                    )}
+                    {activity.users[i] > 0 && (
+                      <p className="text-xs text-yellow-400">
+                        {activity.users[i]}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

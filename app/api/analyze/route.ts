@@ -220,9 +220,10 @@ export async function POST(request: NextRequest) {
       } else {
         // Pengunjung trial BARU → bikin trialId baru, hitungan = 1
         trialId = crypto.randomUUID();
+        const utmSource = (formData.get("utm_source") as string) || null;
         const { data: newTrial } = await supabaseAdmin
           .from("trials")
-          .insert({ trial_id: trialId, upload_count: 1 })
+          .insert({ trial_id: trialId, upload_count: 1, source: utmSource })
           .select("upload_count, trial_limit")
           .single();
 
