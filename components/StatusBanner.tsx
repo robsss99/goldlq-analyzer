@@ -23,6 +23,11 @@ type Props = {
   overrideUsed?: number;
 };
 
+function getDaysRemaining(expiresAt: string): number {
+  const diff = new Date(expiresAt).getTime() - new Date().getTime();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
 export default function StatusBanner({
   overrideRemaining,
   overrideUsed,
@@ -88,9 +93,12 @@ export default function StatusBanner({
               <p className="text-sm font-semibold text-orange-300">
                 Kuota upload kamu habis ({me.limit}x)
               </p>
-              <p className="text-xs text-gray-400">
-                Hubungi admin untuk perpanjang masa aktif.
-              </p>
+              <button
+                onClick={() => router.push("/fullversion")}
+                className="text-xs px-3 py-1.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/40 text-orange-300 font-medium transition mt-1"
+              >
+                Lihat cara perpanjang →
+              </button>
             </div>
           </div>
           <button
@@ -115,9 +123,12 @@ export default function StatusBanner({
               <p className="text-sm font-semibold text-orange-300">
                 Masa aktif kamu sudah habis
               </p>
-              <p className="text-xs text-gray-400">
-                Hubungi admin untuk perpanjang langganan.
-              </p>
+              <button
+                onClick={() => router.push("/fullversion")}
+                className="text-xs px-3 py-1.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/40 text-orange-300 font-medium transition mt-1"
+              >
+                Lihat cara perpanjang →
+              </button>
             </div>
           </div>
           <button
@@ -133,6 +144,14 @@ export default function StatusBanner({
 
   // 3. USER LOGIN — normal
   if (me.status === "user") {
+    const daysLeft = me.expiresAt ? getDaysRemaining(me.expiresAt) : null;
+    const daysColor =
+      daysLeft === null || daysLeft > 7
+        ? "text-gray-500"
+        : daysLeft > 3
+          ? "text-yellow-400"
+          : "text-red-400";
+
     return (
       <div className="container mx-auto px-4 pt-4">
         <div
@@ -150,11 +169,16 @@ export default function StatusBanner({
                 Halo, {me.username}!
               </p>
               <p className="text-xs text-gray-400">
-                Sisa Kuota :{" "}
+                Sisa kuota:{" "}
                 <span className="text-white font-semibold">
                   {remaining}/{me.limit}
                 </span>{" "}
                 upload
+                {daysLeft !== null && (
+                  <span className={"ml-2 " + daysColor}>
+                    · {daysLeft} hari lagi
+                  </span>
+                )}
               </p>
             </div>
           </div>

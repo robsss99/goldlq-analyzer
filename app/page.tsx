@@ -13,10 +13,21 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+
   const [statusOverride, setStatusOverride] = useState<{
     used: number;
     remaining: number;
   } | null>(null);
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handleAnalyze = async (file: File) => {
     setIsAnalyzing(true);
@@ -44,6 +55,10 @@ export default function Home() {
         console.log(`✅ Analysis completed in ${duration}s`);
         console.log("Result:", data.analysis);
         setAnalysisResult(data);
+        showToast(
+          "✅ Analisa selesai! Scroll ke bawah untuk melihat hasil.",
+          "success",
+        );
 
         // Update info banner real-time (trial ATAU user login)
         const newInfo = data.trial || data.user;
@@ -61,10 +76,15 @@ export default function Home() {
       } else {
         console.error("❌ API error:", data);
         setAnalysisError(data.error || "Gagal menganalisa chart");
+        showToast("❌ " + (data.error || "Analisa gagal"), "error");
       }
     } catch (err) {
       console.error("❌ Request failed:", err);
       setAnalysisError("Gagal connect ke server. Cek koneksi internet Anda.");
+      showToast(
+        "❌ Gagal connect ke server. Cek koneksi internet Anda.",
+        "error",
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -118,7 +138,7 @@ export default function Home() {
         </h2>
 
         <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-8">
-          Upload screenshot chart MT5 Anda, dapatkan analisa profesional dari
+          Upload screenshot chart XAUUSD Anda, dapatkan analisa profesional dari
           360tradersss dengan teknik{" "}
           <span className="text-yellow-400 font-semibold">
             LQ (Liquidity Quartile)
@@ -157,6 +177,39 @@ export default function Home() {
           </div>
         )}
 
+        {/* Empty State — muncul sebelum analisa pertama */}
+        {!analysisResult && !isAnalyzing && (
+          <div className="max-w-3xl mx-auto mt-6">
+            <div className="border border-dashed border-[#1e222d] rounded-2xl p-8 md:p-10 text-center">
+              <div className="text-5xl mb-4">📈</div>
+              <h3 className="text-gray-300 font-semibold mb-2">
+                Hasil analisa akan muncul di sini
+              </h3>
+              <p className="text-gray-600 text-xs max-w-xs mx-auto leading-relaxed mb-6">
+                Upload screenshot chart XAUUSD di atas, lalu klik tombol analisa
+                untuk mendapatkan:
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-w-sm mx-auto">
+                {[
+                  "📊 Data OHLC",
+                  "💎 LQ Equilibrium",
+                  "🎯 Entry / SL / TP",
+                  "🏗️ Struktur Trend",
+                  "📋 Playbook Skenario",
+                  "⚖️ Risk:Reward Ratio",
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="bg-[#131722] border border-[#1e222d] rounded-lg px-3 py-2"
+                  >
+                    <p className="text-xs text-gray-500">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {analysisResult && (
           <AnalysisResult
             analysis={analysisResult.analysis}
@@ -183,6 +236,22 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 inset-x-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 z-50">
+          <div
+            className={
+              "px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold text-center " +
+              (toast.type === "success"
+                ? "bg-[#26a69a] text-white"
+                : "bg-[#ef5350] text-white")
+            }
+          >
+            {toast.message}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
