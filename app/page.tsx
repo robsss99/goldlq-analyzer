@@ -1,9 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UploadSection from "@/components/UploadSection";
 import AnalysisResult from "@/components/AnalysisResult";
 import StatusBanner from "@/components/StatusBanner";
+import WelcomeModal from "@/components/WelcomeModal";
+
+const TRADING_QUOTES = [
+  {
+    text: "Trader sukses bukan yang selalu benar, tapi yang bisa mengontrol kerugiannya.",
+    author: "Prinsip Trading",
+  },
+  {
+    text: "SL bukan tanda kekalahan — itu tanda kamu menghormati modal kamu.",
+    author: "Risk Management",
+  },
+  {
+    text: "1% risiko per trade, 100 trade pun kamu masih hidup untuk belajar.",
+    author: "Money Management",
+  },
+  {
+    text: "Profit terbesar datang dari trade yang paling disiplin, bukan yang paling agresif.",
+    author: "Trading Mindset",
+  },
+  {
+    text: "Pasar selalu ada besok. Modal yang habis — tidak.",
+    author: "Capital Preservation",
+  },
+  {
+    text: "Risk management adalah fondasi, analisa adalah atapnya. Jangan bangun rumah tanpa fondasi.",
+    author: "Trading Philosophy",
+  },
+  {
+    text: "Bukan soal berapa kali kamu benar, tapi berapa besar kamu untung vs berapa kecil kamu rugi.",
+    author: "Expectancy",
+  },
+  {
+    text: "Trade tanpa SL ibarat nyetir tanpa rem — aman mungkin sekarang, tapi berbahaya selamanya.",
+    author: "Risk Discipline",
+  },
+];
 
 export default function Home() {
   const [timeframe, setTimeframe] = useState<"D1" | "H4" | "H1" | "M15">("D1");
@@ -18,6 +54,19 @@ export default function Home() {
     used: number;
     remaining: number;
   } | null>(null);
+
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  useEffect(() => {
+    // Random quote - harus di client bukan SSR
+    setQuoteIndex(Math.floor(Math.random() * TRADING_QUOTES.length));
+    if (window.location.search.includes("welcome=1")) {
+      // Bersihkan URL param tanpa reload
+      window.history.replaceState({}, "", "/");
+      setShowWelcome(true);
+    }
+  }, []);
 
   const [toast, setToast] = useState<{
     message: string;
@@ -178,16 +227,26 @@ export default function Home() {
         )}
 
         {/* Empty State — muncul sebelum analisa pertama */}
+        {/* Empty State dengan quote acak */}
         {!analysisResult && !isAnalyzing && (
           <div className="max-w-3xl mx-auto mt-6">
-            <div className="border border-dashed border-[#1e222d] rounded-2xl p-8 md:p-10 text-center">
-              <div className="text-5xl mb-4">📈</div>
-              <h3 className="text-gray-300 font-semibold mb-2">
-                Hasil analisa akan muncul di sini
-              </h3>
-              <p className="text-gray-600 text-xs max-w-xs mx-auto leading-relaxed mb-6">
-                Upload screenshot chart XAUUSD di atas, lalu klik tombol analisa
-                untuk mendapatkan:
+            <div className="border border-dashed border-[#1e222d] rounded-2xl p-8 md:p-10">
+              {/* Quote acak */}
+              <div className="text-center mb-6">
+                <p className="text-gray-300 text-sm italic leading-relaxed mb-2 max-w-sm mx-auto">
+                  "{TRADING_QUOTES[quoteIndex].text}"
+                </p>
+                <p className="text-xs text-yellow-400/70">
+                  — {TRADING_QUOTES[quoteIndex].author}
+                </p>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-[#1e222d] mb-6" />
+
+              {/* Preview items */}
+              <p className="text-gray-600 text-xs text-center mb-3">
+                Upload chart di atas untuk mendapatkan:
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-w-sm mx-auto">
                 {[
@@ -236,6 +295,12 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Welcome Modal */}
+      <WelcomeModal
+        isOpen={showWelcome}
+        onClose={() => setShowWelcome(false)}
+      />
 
       {/* Toast Notification */}
       {toast && (

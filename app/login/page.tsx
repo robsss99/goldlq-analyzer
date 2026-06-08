@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,7 +31,8 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        router.push("/");
+        // /?welcome=1 → trigger welcome modal di homepage
+        router.push("/?welcome=1");
       } else {
         setError(data.message || "Login gagal");
       }
@@ -43,6 +45,14 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0e1a] px-4">
+      {/* Tombol Kembali */}
+      <Link
+        href="/"
+        className="fixed top-4 left-4 flex items-center gap-1.5 text-xs text-gray-500 hover:text-yellow-400 transition px-3 py-1.5 rounded-lg border border-[#1e222d] hover:border-yellow-400/30 bg-[#131722]"
+      >
+        ← Kembali
+      </Link>
+
       <div className="w-full max-w-md">
         {/* Logo / Judul */}
         <div className="text-center mb-8">
@@ -66,6 +76,7 @@ export default function LoginPage() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               placeholder="Masukkan username"
               className="w-full px-4 py-3 rounded-lg bg-[#0a0e1a] border border-[#1e222d] text-white placeholder-gray-600 focus:outline-none focus:border-yellow-400 transition-colors"
             />
@@ -80,6 +91,7 @@ export default function LoginPage() {
               type="text"
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               placeholder="Masukkan access code"
               className="w-full px-4 py-3 rounded-lg bg-[#0a0e1a] border border-[#1e222d] text-white placeholder-gray-600 focus:outline-none focus:border-yellow-400 transition-colors"
             />
@@ -104,8 +116,13 @@ export default function LoginPage() {
 
         {/* Info bawah */}
         <p className="text-center text-gray-500 text-xs mt-6">
-          Belum punya akses? Hubungi admin{" "}
-          <span className="text-yellow-400">@360tradersss</span>
+          Belum punya akses?{" "}
+          <Link
+            href="/fullversion"
+            className="text-yellow-400 hover:underline font-medium"
+          >
+            Lihat cara berlangganan →
+          </Link>
         </p>
       </div>
     </div>
