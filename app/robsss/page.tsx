@@ -87,6 +87,9 @@ export default function AdminPage() {
 
   // Action loading state
   const [actionLoading, setActionLoading] = useState<string>("");
+  const [userFilter, setUserFilter] = useState<"all" | "expiring" | "inactive">(
+    "all",
+  );
 
   // Check auth saat pertama load
   useEffect(() => {
@@ -294,67 +297,6 @@ export default function AdminPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6 max-w-5xl">
-        {/* ===== F7-A: USER SEGERA EXPIRED ===== */}
-        {(() => {
-          const expiringSoon = users.filter((u) => {
-            const days = Math.ceil(
-              (new Date(u.expires_at).getTime() - new Date().getTime()) /
-                (1000 * 60 * 60 * 24),
-            );
-            return days >= 0 && days <= 7 && u.is_active;
-          });
-          if (expiringSoon.length === 0) return null;
-          return (
-            <div>
-              <h2 className="text-sm font-semibold text-orange-400 mb-3">
-                ⚠️ Segera Expired ({expiringSoon.length} user)
-              </h2>
-              <div className="space-y-2">
-                {expiringSoon.map((user) => {
-                  const daysLeft = Math.ceil(
-                    (new Date(user.expires_at).getTime() -
-                      new Date().getTime()) /
-                      (1000 * 60 * 60 * 24),
-                  );
-                  return (
-                    <div
-                      key={user.id}
-                      className="bg-orange-500/5 border border-orange-500/30 rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg">⏰</span>
-                        <div>
-                          <span className="font-mono font-semibold text-orange-300 text-sm">
-                            {user.username}
-                          </span>
-                          <p className="text-xs text-gray-500">
-                            Expired dalam{" "}
-                            <span className="text-orange-400 font-semibold">
-                              {daysLeft} hari
-                            </span>{" "}
-                            · {user.upload_count}/{user.upload_limit} upload
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() =>
-                          handleUserAction(user.username, "extend")
-                        }
-                        disabled={!!actionLoading}
-                        className="px-3 py-1.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-300 text-xs font-semibold transition disabled:opacity-50"
-                      >
-                        {actionLoading === user.username + "_extend"
-                          ? "..."
-                          : "+1 Bulan"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
-
         {/* ===== STATISTIK ===== */}
         {stats && (
           <div>
@@ -656,17 +598,73 @@ export default function AdminPage() {
 
         {/* ===== DAFTAR USER ===== */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-400">
-              👥 Daftar User ({users.length})
-            </h2>
-            <button
-              onClick={loadData}
-              disabled={isLoadingData}
-              className="text-xs text-gray-500 hover:text-yellow-400 transition"
-            >
-              {isLoadingData ? "Memuat..." : "🔄 Refresh"}
-            </button>
+          {/* Header + Filter Tabs */}
+          <div className="flex flex-col gap-3 mb-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-400">
+                👥 Daftar User
+              </h2>
+              <button
+                onClick={loadData}
+                disabled={isLoadingData}
+                className="text-xs text-gray-500 hover:text-yellow-400 transition"
+              >
+                {isLoadingData ? "Memuat..." : "🔄 Refresh"}
+              </button>
+            </div>
+
+            {/* Filter tabs */}
+            <div className="flex gap-2 flex-wrap">
+              {[
+                {
+                  key: "all" as const,
+                  label: "Semua",
+                  count: users.length,
+                  active:
+                    "bg-yellow-400/20 border-yellow-400/40 text-yellow-400",
+                  inactive:
+                    "bg-[#131722] border-[#1e222d] text-gray-500 hover:text-gray-300",
+                },
+                {
+                  key: "expiring" as const,
+                  label: "⚠️ Mau Expired",
+                  count: users.filter((u) => {
+                    const days = Math.ceil(
+                      (new Date(u.expires_at).getTime() -
+                        new Date().getTime()) /
+                        (1000 * 60 * 60 * 24),
+                    );
+                    return days >= 0 && days <= 7 && u.is_active;
+                  }).length,
+                  active:
+                    "bg-orange-500/20 border-orange-500/40 text-orange-300",
+                  inactive:
+                    "bg-[#131722] border-[#1e222d] text-gray-500 hover:text-gray-300",
+                },
+                {
+                  key: "inactive" as const,
+                  label: "❌ Nonaktif",
+                  count: users.filter((u) => {
+                    const isExpired = new Date(u.expires_at) < new Date();
+                    return !u.is_active || isExpired;
+                  }).length,
+                  active: "bg-red-500/20 border-red-500/40 text-red-400",
+                  inactive:
+                    "bg-[#131722] border-[#1e222d] text-gray-500 hover:text-gray-300",
+                },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setUserFilter(tab.key)}
+                  className={
+                    "px-3 py-1.5 rounded-lg text-xs font-medium transition border " +
+                    (userFilter === tab.key ? tab.active : tab.inactive)
+                  }
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
           </div>
 
           {users.length === 0 ? (
@@ -675,124 +673,140 @@ export default function AdminPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {users.map((user) => {
-                const expired = isExpired(user.expires_at);
-                const isActive = user.is_active && !expired;
-                return (
-                  <div
-                    key={user.id}
-                    className={
-                      "bg-[#131722] border rounded-xl p-4 " +
-                      (isActive
-                        ? "border-[#1e222d]"
-                        : "border-red-500/20 opacity-75")
-                    }
-                  >
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      {/* Info user */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="font-mono font-semibold text-yellow-400 text-sm">
-                            {user.username}
-                          </span>
-                          <span
-                            className={
-                              "text-xs px-2 py-0.5 rounded-full " +
-                              (isActive
-                                ? "bg-green-500/10 text-green-400 border border-green-500/30"
-                                : "bg-red-500/10 text-red-400 border border-red-500/30")
-                            }
-                          >
-                            {isActive
-                              ? "✅ Aktif"
-                              : expired
-                                ? "⏰ Expired"
-                                : "❌ Nonaktif"}
-                          </span>
-                        </div>
-                        <div className="flex gap-4 flex-wrap">
-                          <span className="text-xs text-gray-500">
-                            Code:{" "}
-                            <span className="text-gray-300 font-mono">
-                              {user.access_code}
+              {users
+                .filter((u) => {
+                  if (userFilter === "expiring") {
+                    const days = Math.ceil(
+                      (new Date(u.expires_at).getTime() -
+                        new Date().getTime()) /
+                        (1000 * 60 * 60 * 24),
+                    );
+                    return days >= 0 && days <= 7 && u.is_active;
+                  }
+                  if (userFilter === "inactive") {
+                    const isExpired = new Date(u.expires_at) < new Date();
+                    return !u.is_active || isExpired;
+                  }
+                  return true;
+                })
+                .map((user) => {
+                  const expired = isExpired(user.expires_at);
+                  const isActive = user.is_active && !expired;
+                  return (
+                    <div
+                      key={user.id}
+                      className={
+                        "bg-[#131722] border rounded-xl p-4 " +
+                        (isActive
+                          ? "border-[#1e222d]"
+                          : "border-red-500/20 opacity-75")
+                      }
+                    >
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        {/* Info user */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className="font-mono font-semibold text-yellow-400 text-sm">
+                              {user.username}
                             </span>
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            Upload:{" "}
-                            <span className="text-gray-300">
-                              {user.upload_count}/{user.upload_limit}
-                            </span>
-                          </span>
-                          <span
-                            className={
-                              "text-xs " +
-                              (expired ? "text-red-400" : "text-gray-500")
-                            }
-                          >
-                            Exp:{" "}
                             <span
                               className={
-                                expired
-                                  ? "text-red-400 font-semibold"
-                                  : "text-gray-300"
+                                "text-xs px-2 py-0.5 rounded-full " +
+                                (isActive
+                                  ? "bg-green-500/10 text-green-400 border border-green-500/30"
+                                  : "bg-red-500/10 text-red-400 border border-red-500/30")
                               }
                             >
-                              {formatDate(user.expires_at)}
+                              {isActive
+                                ? "✅ Aktif"
+                                : expired
+                                  ? "⏰ Expired"
+                                  : "❌ Nonaktif"}
                             </span>
-                          </span>
+                          </div>
+                          <div className="flex gap-4 flex-wrap">
+                            <span className="text-xs text-gray-500">
+                              Code:{" "}
+                              <span className="text-gray-300 font-mono">
+                                {user.access_code}
+                              </span>
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              Upload:{" "}
+                              <span className="text-gray-300">
+                                {user.upload_count}/{user.upload_limit}
+                              </span>
+                            </span>
+                            <span
+                              className={
+                                "text-xs " +
+                                (expired ? "text-red-400" : "text-gray-500")
+                              }
+                            >
+                              Exp:{" "}
+                              <span
+                                className={
+                                  expired
+                                    ? "text-red-400 font-semibold"
+                                    : "text-gray-300"
+                                }
+                              >
+                                {formatDate(user.expires_at)}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Tombol aksi */}
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            onClick={() =>
+                              handleUserAction(user.username, "extend")
+                            }
+                            disabled={!!actionLoading}
+                            className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs transition disabled:opacity-50"
+                            title="Perpanjang +1 bulan"
+                          >
+                            {actionLoading === user.username + "_extend"
+                              ? "..."
+                              : "+1 Bln"}
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleUserAction(user.username, "reset_quota")
+                            }
+                            disabled={!!actionLoading}
+                            className="px-3 py-1.5 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 border border-yellow-400/30 text-yellow-400 text-xs transition disabled:opacity-50"
+                            title="Reset kuota upload ke 0"
+                          >
+                            {actionLoading === user.username + "_reset_quota"
+                              ? "..."
+                              : "Reset Kuota"}
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleUserAction(user.username, "toggle_active")
+                            }
+                            disabled={!!actionLoading}
+                            className={
+                              "px-3 py-1.5 rounded-lg text-xs transition disabled:opacity-50 border " +
+                              (user.is_active
+                                ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-400"
+                                : "bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-400")
+                            }
+                            title={user.is_active ? "Nonaktifkan" : "Aktifkan"}
+                          >
+                            {actionLoading === user.username + "_toggle_active"
+                              ? "..."
+                              : user.is_active
+                                ? "Nonaktifkan"
+                                : "Aktifkan"}
+                          </button>
                         </div>
                       </div>
-
-                      {/* Tombol aksi */}
-                      <div className="flex gap-2 flex-wrap">
-                        <button
-                          onClick={() =>
-                            handleUserAction(user.username, "extend")
-                          }
-                          disabled={!!actionLoading}
-                          className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs transition disabled:opacity-50"
-                          title="Perpanjang +1 bulan"
-                        >
-                          {actionLoading === user.username + "_extend"
-                            ? "..."
-                            : "+1 Bln"}
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleUserAction(user.username, "reset_quota")
-                          }
-                          disabled={!!actionLoading}
-                          className="px-3 py-1.5 rounded-lg bg-yellow-400/10 hover:bg-yellow-400/20 border border-yellow-400/30 text-yellow-400 text-xs transition disabled:opacity-50"
-                          title="Reset kuota upload ke 0"
-                        >
-                          {actionLoading === user.username + "_reset_quota"
-                            ? "..."
-                            : "Reset Kuota"}
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleUserAction(user.username, "toggle_active")
-                          }
-                          disabled={!!actionLoading}
-                          className={
-                            "px-3 py-1.5 rounded-lg text-xs transition disabled:opacity-50 border " +
-                            (user.is_active
-                              ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-400"
-                              : "bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-400")
-                          }
-                          title={user.is_active ? "Nonaktifkan" : "Aktifkan"}
-                        >
-                          {actionLoading === user.username + "_toggle_active"
-                            ? "..."
-                            : user.is_active
-                              ? "Nonaktifkan"
-                              : "Aktifkan"}
-                        </button>
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           )}
         </div>
