@@ -5,6 +5,7 @@ import UploadSection from "@/components/UploadSection";
 import AnalysisResult from "@/components/AnalysisResult";
 import StatusBanner from "@/components/StatusBanner";
 import WelcomeModal from "@/components/WelcomeModal";
+import BiasBanner from "@/components/BiasBanner";
 
 const TRADING_QUOTES = [
   {
@@ -211,6 +212,9 @@ export default function Home() {
           + Smart Money Concept lengkap dengan setup entry, SL, dan TP.
         </p>
       </section>
+
+      {/* Bias Banner */}
+      <BiasBanner />
 
       {/* Upload Section */}
       <section className="container mx-auto px-4 pb-12">

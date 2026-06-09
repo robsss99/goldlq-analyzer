@@ -204,6 +204,22 @@ export default function BiasPage() {
           >
             LOGIN / AKTIVASI
           </button>
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={() => router.push("/")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: TEXT_DIM,
+                fontSize: "0.62rem",
+                letterSpacing: "0.1em",
+                cursor: "pointer",
+                fontFamily: "monospace",
+              }}
+            >
+              ← Kembali ke halaman utama
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -266,6 +282,28 @@ export default function BiasPage() {
       <div className="bias-container">
         {/* Header + greeting personal */}
         <div style={{ marginBottom: 18 }}>
+          {/* Tombol kembali ke halaman utama */}
+          <button
+            onClick={() => router.push("/")}
+            style={{
+              background: "transparent",
+              border: `1px solid ${BORDER}`,
+              borderRadius: 6,
+              padding: "6px 14px",
+              color: TEXT_DIM,
+              fontSize: "0.6rem",
+              letterSpacing: "0.1em",
+              cursor: "pointer",
+              fontFamily: "monospace",
+              marginBottom: 14,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            ← KEMBALI
+          </button>
+
           <div
             style={{
               display: "flex",
@@ -848,7 +886,7 @@ export default function BiasPage() {
               letterSpacing: "0.15em",
             }}
           >
-            COMPLEX ANALYZE BY · @360TRADERSSS
+            POWERED BY CLAUDE AI · @360TRADERSSS
           </div>
           <div
             style={{
