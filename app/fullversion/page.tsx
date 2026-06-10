@@ -54,6 +54,34 @@ export default function BerlanggananPage() {
           <h3 className="text-lg font-semibold text-yellow-400 mb-5">
             ✨ Yang kamu dapatkan:
           </h3>
+
+          {/* Daily Bias Feature — Full width highlight */}
+          <div className="w-full mb-5 p-4 rounded-xl bg-linear-to-r from-yellow-400/10 to-orange-400/5 border border-yellow-400/40">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-lg bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xl">⚡</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-400/20 border border-yellow-400/30 text-yellow-400 font-semibold">
+                    EKSKLUSIF
+                  </span>
+                  <h4 className="text-sm font-bold text-white">
+                    Daily Bias XAUUSD — Fundamental Analyzer
+                  </h4>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  1 klik baca semua analisa makro emas hari ini: arah bias
+                  harian (BEARISH/BULLISH), sentimen Fed, tekanan DXY, Safe
+                  Haven index, Swing & Day bias — lengkap dengan cluster faktor
+                  pendukung, key levels, dan konteks berita terkini. Nggak perlu
+                  buka banyak tab lagi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
               {
@@ -77,7 +105,7 @@ export default function BerlanggananPage() {
                 text: "Analisa struktur: trend, bias, candle pattern, key levels. Lengkap banget!",
               },
               {
-                icon: "⚡",
+                icon: "⏰",
                 text: "Hasil analisa dalam hitungan detik (~20 detik). Lebih cepat dari tarik garis! 😄",
               },
               {

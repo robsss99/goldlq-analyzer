@@ -79,13 +79,13 @@ export default function WelcomeModal({ isOpen, onClose }: Props) {
         <div className="grid grid-cols-2 gap-3 mb-4">
           {/* Kuota */}
           <div className="bg-[#0a0e1a] border border-[#1e222d] rounded-xl p-3">
-            <p className="text-xs text-gray-500 mb-1">Kuota Upload</p>
+            <p className="text-xs text-gray-500 mb-1">Sisa Kuota</p>
             {user ? (
               <>
                 <p className="text-2xl font-bold text-yellow-400">
-                  {user.limit}x
+                  {user.remaining}x
                 </p>
-                <p className="text-xs text-gray-600">analisa tersedia</p>
+                <p className="text-xs text-gray-600">analisa tersisa</p>
               </>
             ) : (
               <div className="h-8 bg-[#1e222d] rounded animate-pulse" />

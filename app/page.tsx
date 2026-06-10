@@ -214,7 +214,9 @@ export default function Home() {
       </section>
 
       {/* Bias Banner */}
-      <BiasBanner />
+      <section className="container mx-auto px-4">
+        <BiasBanner />
+      </section>
 
       {/* Upload Section */}
       <section className="container mx-auto px-4 pb-12">
