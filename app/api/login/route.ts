@@ -88,6 +88,15 @@ export async function POST(request: Request) {
       path: "/",
     });
 
+    // Tambahan baru - tandai browser ini sudah pernah login
+    response.cookies.set("goldlq_has_account", "1", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365, // 1 tahun
+      path: "/",
+    });
+
     return response;
   } catch (err) {
     return NextResponse.json(

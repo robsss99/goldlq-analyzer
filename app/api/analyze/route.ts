@@ -63,6 +63,19 @@ export async function POST(request: NextRequest) {
         );
       }
     } else {
+      // ===== Cek dulu: browser ini pernah punya akun? =====
+      const hasAccount = cookieStore.get("goldlq_has_account")?.value === "1";
+      if (hasAccount) {
+        return NextResponse.json(
+          {
+            error:
+              "Kamu sudah punya akun. Silakan login untuk lanjut menganalisa.",
+            hasAccount: true,
+          },
+          { status: 401 },
+        );
+      }
+
       // ===== JALUR TRIAL (tanpa login) =====
       isTrial = true;
       trialId = cookieStore.get("goldlq_trial")?.value || "";

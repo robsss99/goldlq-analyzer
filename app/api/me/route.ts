@@ -36,6 +36,15 @@ export async function GET() {
       // Cookie login ada tapi user nggak ketemu di DB → fallback ke trial
     }
 
+    // ===== Cek apakah browser ini pernah login sebelumnya =====
+    const hasAccount = cookieStore.get("goldlq_has_account")?.value === "1";
+    if (hasAccount) {
+      return NextResponse.json({
+        status: "has_account",
+        canAnalyze: false,
+      });
+    }
+
     // ===== Cek trial =====
     if (trialId) {
       const { data: trial } = await supabaseAdmin

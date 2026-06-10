@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 // Tipe data dari /api/me
 type MeStatus = {
-  status: "user" | "trial";
+  status: "user" | "trial" | "has_account";
   username?: string;
   used: number;
   limit: number;
@@ -193,7 +193,34 @@ export default function StatusBanner({
     );
   }
 
-  // 4. TRIAL — habis
+  // 4. PUNYA AKUN — tapi belum login
+  if (me.status === "has_account") {
+    return (
+      <div className="container mx-auto px-4 pt-4">
+        <div className="max-w-3xl mx-auto p-4 rounded-xl bg-yellow-400/5 border border-yellow-400/20 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">👤</span>
+            <div>
+              <p className="text-sm font-semibold text-yellow-400">
+                Kamu sudah punya akun!
+              </p>
+              <p className="text-xs text-gray-400">
+                Login untuk lanjut analisa dengan kuota penuh.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push("/login")}
+            className="px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-xs transition"
+          >
+            🔑 Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. TRIAL — habis
   if (me.status === "trial" && me.isTrialDone) {
     return (
       <div className="container mx-auto px-4 pt-4">
@@ -236,7 +263,7 @@ export default function StatusBanner({
     );
   }
 
-  // 5. TRIAL — masih jalan
+  // 6. TRIAL — masih jalan
   if (me.status === "trial") {
     return (
       <div className="container mx-auto px-4 pt-4">
