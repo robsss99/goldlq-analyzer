@@ -286,7 +286,13 @@ export default function StatusBanner({
                 upload tersisa. Kalau cocok baru deh lanjut berlangganan!
               </p>
               <p className="text-xs text-gray-400">
-                Login kalau sudah punya akun berlangganan.
+                Login kalau sudah punya akun.{" "}
+                <a
+                  href="/fullversion"
+                  className="text-yellow-400/80 hover:text-yellow-400 underline transition"
+                >
+                  Belum punya? Lihat cara berlangganan →
+                </a>
               </p>
             </div>
           </div>
