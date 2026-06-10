@@ -886,7 +886,7 @@ export default function BiasPage() {
               letterSpacing: "0.15em",
             }}
           >
-            POWERED BY CLAUDE AI · @360TRADERSSS
+            COMPLEX ANALYZED BY · @360TRADERSSS
           </div>
           <div
             style={{
