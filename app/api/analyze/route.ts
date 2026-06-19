@@ -320,9 +320,12 @@ export async function POST(request: NextRequest) {
     console.error("Error in analyze API:", error);
 
     if (error instanceof Anthropic.APIError) {
+      const isRateLimit = error.status === 429 || error.status === 529;
       return NextResponse.json(
         {
-          error: "AI service error",
+          error: isRateLimit
+            ? "GoldLq sedang maintenance. Coba beberapa saat lagi."
+            : "GoldLq mengalami gangguan teknis. Hubungi Admin.",
           details: error.message,
         },
         { status: error.status || 500 },
