@@ -61,6 +61,9 @@ export default function Home() {
   const [quoteIndex, setQuoteIndex] = useState(0);
 
   useEffect(() => {
+    // Track kunjungan ke halaman
+    fetch("/api/track-visit", { method: "POST" });
+
     // Random quote
     setQuoteIndex(Math.floor(Math.random() * TRADING_QUOTES.length));
 
@@ -70,7 +73,6 @@ export default function Home() {
       setShowWelcome(true);
     }
 
-    // ===== UTM Tracking =====
     // ===== UTM Tracking =====
     const params = new URLSearchParams(window.location.search);
     const utmSrc = params.get("utm_source");

@@ -28,6 +28,7 @@ type Activity = {
   dates: string[];
   trials: number[];
   users: number[];
+  visitors: number[];
   sources: [string, number][];
 };
 
@@ -517,7 +518,11 @@ export default function AdminPage() {
                 </h2>
                 <div className="bg-[#131722] border border-[#1e222d] rounded-2xl p-5">
                   {/* Legend */}
-                  <div className="flex gap-4 mb-4">
+                  <div className="flex gap-4 mb-4 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-sm bg-[#26a69a]/60" />
+                      <span className="text-xs text-gray-500">Pengunjung</span>
+                    </div>
                     <div className="flex items-center gap-1.5">
                       <div className="w-3 h-3 rounded-sm bg-blue-500/60" />
                       <span className="text-xs text-gray-500">Trial baru</span>
@@ -548,6 +553,24 @@ export default function AdminPage() {
                           className="flex-1 flex flex-col items-center gap-1"
                         >
                           <div className="w-full flex items-end justify-center gap-0.5 h-20">
+                            {/* Visitor bar */}
+                            <div
+                              className="flex-1 bg-[#26a69a]/50 hover:bg-[#26a69a]/70 rounded-t transition-all"
+                              style={{
+                                height:
+                                  Math.round(
+                                    (activity.visitors[i] /
+                                      Math.max(
+                                        ...activity.visitors,
+                                        ...activity.trials,
+                                        ...activity.users,
+                                        1,
+                                      )) *
+                                      96,
+                                  ) + "px",
+                              }}
+                              title={"Pengunjung: " + activity.visitors[i]}
+                            />
                             {/* Trial bar */}
                             <div
                               className="flex-1 bg-blue-500/50 hover:bg-blue-500/70 rounded-t transition-all"
@@ -573,6 +596,11 @@ export default function AdminPage() {
                   <div className="grid grid-cols-7 gap-1 mt-2">
                     {activity.dates.map((date, i) => (
                       <div key={date} className="text-center">
+                        {activity.visitors[i] > 0 && (
+                          <p className="text-xs text-[#26a69a]">
+                            {activity.visitors[i]}
+                          </p>
+                        )}
                         {activity.trials[i] > 0 && (
                           <p className="text-xs text-blue-400">
                             {activity.trials[i]}
@@ -1200,7 +1228,7 @@ export default function AdminPage() {
                       }
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="text-lg flex-shrink-0">
+                        <span className="text-lg shrink-0">
                           {tx.type === "income" ? "💚" : "🔴"}
                         </span>
                         <div className="min-w-0">

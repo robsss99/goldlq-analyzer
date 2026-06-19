@@ -26,7 +26,11 @@ export async function GET() {
   since.setDate(since.getDate() - 6);
   since.setHours(0, 0, 0, 0);
 
-  const [{ data: recentTrials }, { data: recentUsers }] = await Promise.all([
+  const [
+    { data: recentTrials },
+    { data: recentUsers },
+    { data: pageViewsData },
+  ] = await Promise.all([
     supabaseAdmin
       .from("trials")
       .select("created_at, source")
@@ -35,6 +39,10 @@ export async function GET() {
       .from("users")
       .select("created_at")
       .gte("created_at", since.toISOString()),
+    supabaseAdmin
+      .from("page_views")
+      .select("date, visitor_count")
+      .gte("date", since.toISOString().split("T")[0]),
   ]);
 
   // Hitung per tanggal
@@ -52,6 +60,14 @@ export async function GET() {
   recentUsers?.forEach((u) => {
     const d = u.created_at.split("T")[0];
     if (d in usersByDate) usersByDate[d]++;
+  });
+
+  const viewsByDate: Record<string, number> = {};
+  dates.forEach((d) => {
+    viewsByDate[d] = 0;
+  });
+  pageViewsData?.forEach((pv) => {
+    if (pv.date in viewsByDate) viewsByDate[pv.date] = pv.visitor_count;
   });
 
   // Source breakdown (semua waktu)
@@ -75,6 +91,7 @@ export async function GET() {
     dates,
     trials: dates.map((d) => trialsByDate[d]),
     users: dates.map((d) => usersByDate[d]),
+    visitors: dates.map((d) => viewsByDate[d]),
     sources,
   });
 }
